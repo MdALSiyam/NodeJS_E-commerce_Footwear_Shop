@@ -9,10 +9,13 @@ const server = http.createServer(app);
 const io = socketio(server);
 const PORT = 3000;
 
-app.use(express.static('public')); // Essential for serving static files (images, CSS, JS)
-app.use('/uploads', express.static('uploads')); // If you have uploads
+// Set up correct paths for Vercel
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.set('views', path.join(__dirname, 'views')); // Fixed views directory path
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -26,7 +29,7 @@ app.use('/', homeRoutes);
 app.use('/admin', adminRoutes);
 // app.use('/shop', shopRoutes);
 app.use('/cart', cartRoutes);
-app.use('/admin', productRoutes); // Fix: Avoid duplicate admin routes
+app.use('/admin', productRoutes);
 
 // Routes
 app.get('/shop', (req, res) => {
@@ -72,7 +75,7 @@ app.get('/product/:id', (req, res) => {
     });
 });
 
-// Socket.io (If you need it)
+// Socket.io
 io.on('connection', (socket) => {
     console.log('A user connected');
 
@@ -86,10 +89,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start server
+// Start server (For localhost)
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// Vercel Deployment
+// Export for Vercel Deployment
 module.exports = app;
