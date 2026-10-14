@@ -8,32 +8,36 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-// Render-এর জন্য ডাইনামিক পোর্ট সেটআপ (ফ্রি টায়ার বা লোকালহোস্ট উভয়ের জন্য কাজ করবে)
+// Dynamic port configuration for production (Render) and local development
 const PORT = process.env.PORT || 3000;
 
-// Set up correct paths
+// Serve static assets
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Configure view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware for parsing request bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Import route modules
 const homeRoutes = require('./routes/home');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const cartRoutes = require('./routes/cart');
 const productRoutes = require('./routes/product');
 
+// Register routes
 app.use('/', homeRoutes);
 app.use('/admin', adminRoutes);
 // app.use('/shop', shopRoutes);
 app.use('/cart', cartRoutes);
 app.use('/admin', productRoutes);
 
-// Routes
+// Shop route to serve product list
 app.get('/shop', (req, res) => {
     const productFilePath = path.join(__dirname, 'data', 'products.json');
     fs.readFile(productFilePath, 'utf8', (err, data) => {
@@ -51,6 +55,7 @@ app.get('/shop', (req, res) => {
     });
 });
 
+// Single product details route
 app.get('/product/:id', (req, res) => {
     const productId = req.params.id;
     const productFilePath = path.join(__dirname, 'data', 'products.json');
@@ -77,7 +82,7 @@ app.get('/product/:id', (req, res) => {
     });
 });
 
-// Socket.io
+// Real-time WebSocket connection using Socket.io
 io.on('connection', (socket) => {
     console.log('A user connected');
 
@@ -91,7 +96,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start server for Render and Localhost (Socket.io requires server.listen)
+// Start listening server
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
