@@ -7,14 +7,16 @@ const socketio = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
-const PORT = 3000;
 
-// Set up correct paths for Vercel
+// Render-এর জন্য ডাইনামিক পোর্ট সেটআপ (ফ্রি টায়ার বা লোকালহোস্ট উভয়ের জন্য কাজ করবে)
+const PORT = process.env.PORT || 3000;
+
+// Set up correct paths
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // Fixed views directory path
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -89,10 +91,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start server (For localhost)
+// Start server for Render and Localhost (Socket.io requires server.listen)
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
-
-// Export for Vercel Deployment
-module.exports = app;
